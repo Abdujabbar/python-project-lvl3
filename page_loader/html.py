@@ -1,25 +1,19 @@
-import requests
-from page_loader.file import generate_name
-
-
-def get_page_content(url):
-
-    response = requests.get(url)
-
-    if response.ok:
-        return response.content
-
-    raise Exception(
-        f"Trouble while get content,"
-        f"response status: {response.status_code}")
+from page_loader.file import generate_html_path
+from page_loader.file import generate_media_path
+from page_loader.file import save_content
+from page_loader.media import download_images
+from page_loader.page import get_content
 
 
 def download(url, dir_path):
-    file_name = generate_name(url)
+    content = get_content(url)
 
-    path_to_store = f"{dir_path}/{file_name}"
+    media_path = generate_media_path(url, dir_path)
 
-    content = get_page_content(url)
+    content = download_images(content, media_path)
 
-    with open(path_to_store, 'wb') as ctx:
-        ctx.write(content)
+    html_path = generate_html_path(url, dir_path)
+
+    save_content(html_path, content.encode())
+
+    return html_path

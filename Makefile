@@ -15,3 +15,6 @@ lint:
 
 page_loader:
 	poetry run page_loader
+
+test:
+	poetry run pytest

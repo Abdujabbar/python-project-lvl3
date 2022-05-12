@@ -1,14 +1,15 @@
-def generate_name(url):
-    url = url.replace('https://', '').replace('http://', '')
+import os
+from page_loader.slug import sluggify
 
-    result = []
 
-    for c in url:
-        if not c.isalpha():
-            result.append('-')
-        else:
-            result.append(c)
+def generate_media_path(url, dir_path=os.getcwd()):
+    return f"{dir_path}/{sluggify(url)}_files"
 
-    result.append('.html')
 
-    return ''.join(result)
+def generate_html_path(url, dir_path=os.getcwd()):
+    return f"{dir_path}/{sluggify(url)}.html"
+
+
+def save_content(path, content):
+    with open(path, 'wb') as ctx:
+        ctx.write(content)
