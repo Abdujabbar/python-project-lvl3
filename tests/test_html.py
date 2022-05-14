@@ -1,27 +1,29 @@
 import pytest
 import os
-import vcr
-
+import requests_mock
 from page_loader.exceptions import FailureFetchContentException
 from page_loader.html import download
 from tests import FIXTURES_PATH
 
 
-@vcr.use_cassette(f"{FIXTURES_PATH}/cassettes/test_download")
 @pytest.mark.parametrize(
-    "test_case, path",
+    "test_case, path, mock_html_path",
     [
         (
             "https://ru.hexlet.io/teams",
             "/var/tmp",
+            f"{FIXTURES_PATH}/page-with-assets.html"
         ),
     ]
 )
-def test_download(test_case, path):
+def test_download(test_case, path, mock_html_path):
+    with requests_mock.Mocker() as mock_request:
+        with open(mock_html_path, 'r') as ctx:
+            mock_request.get(test_case, ctx.read())
 
-    output_path = download(test_case, path)
+            output_path = download(test_case, path)
 
-    assert os.path.exists(output_path)
+            assert os.path.exists(output_path)
 
 
 @pytest.mark.parametrize(

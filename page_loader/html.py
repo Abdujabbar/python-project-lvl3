@@ -1,8 +1,8 @@
 from page_loader.file import generate_html_path
 from page_loader.file import generate_media_path
 from page_loader.file import save_content
-from page_loader.media import download_images
-from page_loader.page import get_content
+from page_loader.assets import download_images
+from page_loader.resource import get_content
 
 
 def download(url, dir_path):

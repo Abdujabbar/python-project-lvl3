@@ -1,7 +1,7 @@
 import os
 from bs4 import BeautifulSoup
 from validators.url import url as url_validator
-from page_loader.page import get_content
+from page_loader.resource import get_content
 from page_loader.file import save_content
 
 
@@ -24,3 +24,9 @@ def download_images(content, path):
         img['src'] = full_path
 
     return soup.prettify()
+
+
+def download_assets(content, path):
+    content = download_images(content, path)
+
+    return content
