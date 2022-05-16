@@ -1,6 +1,6 @@
 import pytest
 import os
-from page_loader.file import generate_html_path, generate_media_path
+from page_loader.storage import generate_assets_path, generate_html_path
 
 
 @pytest.mark.parametrize(
@@ -48,4 +48,4 @@ def test_generate_html_path(test_case, expected):
     ]
 )
 def test_generate_generate_media_path(test_case, expected):
-    assert generate_media_path(test_case) == expected
+    assert generate_assets_path(test_case) == expected

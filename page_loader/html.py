@@ -1,16 +1,10 @@
-from page_loader.file import generate_html_path
-from page_loader.file import generate_media_path
-from page_loader.file import save_content
-from page_loader.assets import download_images
-from page_loader.resource import get_content
+from page_loader.storage import generate_html_path
+from page_loader.storage import save_content
+from page_loader.assets import download_assets
 
 
 def download(url, dir_path):
-    content = get_content(url)
-
-    media_path = generate_media_path(url, dir_path)
-
-    content = download_images(content, media_path)
+    content = download_assets(url, dir_path)
 
     html_path = generate_html_path(url, dir_path)
 

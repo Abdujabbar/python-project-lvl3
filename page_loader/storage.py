@@ -2,7 +2,7 @@ import os
 from page_loader.slug import sluggify
 
 
-def generate_media_path(url, dir_path=os.getcwd()):
+def generate_assets_path(url, dir_path=os.getcwd()):
     return f"{dir_path}/{sluggify(url)}_files"
 
 

@@ -5,7 +5,7 @@ from page_loader.exceptions import FailureFetchContentException
 
 def get_content(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=1)
 
         if response.ok:
             return response.content
