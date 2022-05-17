@@ -70,7 +70,7 @@ def prepare_assets(url, store_path):
 
             file_name = extract_source_name(asset_src)
 
-            if file_name.split('.')[-1] not in IMAGE_EXTENSIONS:
+            if tag == 'img' and file_name.split('.')[-1] not in IMAGE_EXTENSIONS:
                 continue
 
             full_image_path = f"{assets_path}/{file_name}"
