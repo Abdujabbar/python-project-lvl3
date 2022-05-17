@@ -14,6 +14,11 @@ ASSETS_WITH_SRC_MAP = {
     'script': 'src'
 }
 
+IMAGE_EXTENSIONS = [
+    'jpg',
+    'png'
+]
+
 
 def generate_public_path(media_path, store_path):
     return media_path.replace(store_path, '').strip('/')
@@ -31,7 +36,7 @@ def extract_source_name(url):
     return obj.path.split('/')[-1]
 
 
-def extract_domain_with_protocol(url):
+def get_domain(url):
     obj = urlparse(url)
 
     return f"{obj.scheme}://{obj.netloc}"
@@ -52,7 +57,7 @@ def prepare_assets(url, store_path):
         logging.info(f"directory not exists: {assets_path}, creatig . . . ")
         os.mkdir(assets_path)
 
-    domain = extract_domain_with_protocol(url)
+    domain = get_domain(url)
 
     logging.info(f"Extracted domain: {domain}")
 
@@ -64,6 +69,10 @@ def prepare_assets(url, store_path):
             asset_src = f"{domain}{node[attr]}".strip()
 
             file_name = extract_source_name(asset_src)
+
+            if file_name.split('.')[-1] not in IMAGE_EXTENSIONS:
+                continue
+
             full_image_path = f"{assets_path}/{file_name}"
 
             node[attr] = generate_public_path(full_image_path, store_path)
@@ -79,7 +88,6 @@ def download_assets(assets):
 
     bar_width = len(assets)
 
-    global bar
     bar = IncrementalBar("Downloading:", max=bar_width)
     with futures.ThreadPoolExecutor(max_workers=8) as executor, bar:
         tasks = [
@@ -91,6 +99,8 @@ def download_assets(assets):
 
 
 def download_asset(url, path, bar):
+    logging.info(f"Trying to download asset: {url}")
+
     try:
         content = get_content(url)
 
@@ -103,5 +113,5 @@ def download_asset(url, path, bar):
         cause_info = (ex.__class__, ex, ex.__traceback__)
         logging.debug(str(ex), exc_info=cause_info)
         logging.warning(
-            f"Page resource {url} wasn't downloaded"
+            f"Resource {url} wasn't downloaded"
         )
