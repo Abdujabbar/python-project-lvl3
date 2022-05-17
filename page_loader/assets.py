@@ -99,7 +99,8 @@ def download_assets(assets):
 
 
 def download_asset(url, path, bar):
-    logging.info(f"Trying to download asset: {url}")
+    logging.info(f"Trying to download asset: {url}"
+                 f"Path for save: {path}")
 
     try:
         content = get_content(url)
