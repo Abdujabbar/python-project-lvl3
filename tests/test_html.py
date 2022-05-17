@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import requests_mock
 from page_loader.exceptions import FailureFetchContentException
 from page_loader.html import download
-from page_loader.assets import download_assets
+from page_loader.assets import download_assets, prepare_assets
 from page_loader.assets import ASSETS_WITH_SRC_MAP
 from tests import FIXTURES_PATH
 
@@ -81,9 +81,10 @@ def test_download_assets(tmpdir, test_case, mock_html_path, image, css, js):
             mock_request.get(f"{test_case}/assets/application.css", text=css)
             mock_request.get(f"{test_case}/packs/js/runtime.js", text=js)
 
-            content = download_assets(test_case, str(tmpdir))
+            html, assets = prepare_assets(test_case, str(tmpdir))
+            download_assets(assets)
 
-            soup = BeautifulSoup(content, 'html.parser')
+            soup = BeautifulSoup(html, 'html.parser')
 
             for tag, attr in ASSETS_WITH_SRC_MAP.items():
                 for node in soup.find_all(tag):
