@@ -1,7 +1,7 @@
 import logging
 import sys
 from page_loader.cli import get_cmd_args
-from page_loader.html import download
+from page_loader import download
 
 
 def main():
@@ -9,11 +9,12 @@ def main():
     try:
         args = get_cmd_args()
 
-        download(args.url, args.output)
+        html_path = download(args.url, args.output)
 
-        logging.info(f"page: {args.url}, finished download")
+        print(f"page: {args.url}, finished download and saved in {html_path}")
+
     except Exception as ex:
-        logging.error(f"Trouble: {ex}")
+        logging.error(ex)
         sys.exit(1)
 
 

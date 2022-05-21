@@ -10,8 +10,14 @@ from tests import FIXTURES_PATH
 
 
 @pytest.fixture
-def image():
+def image_png():
     with open(f"{FIXTURES_PATH}/logo.png", "rb") as ctx:
+        yield ctx.read()
+
+
+@pytest.fixture
+def image_jpeg():
+    with open(f"{FIXTURES_PATH}/random-image.jpeg", "rb") as ctx:
         yield ctx.read()
 
 
@@ -36,12 +42,22 @@ def js():
         ),
     ]
 )
-def test_download(tmpdir, test_case, mock_html_path, image, css, js):
+def test_download(tmpdir, test_case,
+                  mock_html_path, image_png, image_jpeg, css, js):
     with requests_mock.Mocker(real_http=True) as mock_request:
         with open(mock_html_path, 'r') as ctx:
             mock_request.get(test_case, text=ctx.read())
             mock_request.get(
-                f"{test_case}/assets/professions/nodejs.png", content=image)
+                f"{test_case}/assets/professions/nodejs.png", content=image_png)
+
+            mock_request.get(
+                f"{test_case}/assets/professions/random-image.jpeg",
+                content=image_jpeg)
+
+            mock_request.get(
+                f"{test_case}/about",
+                content=image_jpeg)
+
             mock_request.get(f"{test_case}/assets/application.css", text=css)
             mock_request.get(f"{test_case}/packs/js/runtime.js", text=js)
             output_path = download(test_case, str(tmpdir))
@@ -71,13 +87,16 @@ def test_download_failure(test_case, path):
         ),
     ]
 )
-def test_download_assets(tmpdir, test_case, mock_html_path, image, css, js):
+def test_download_assets(tmpdir, test_case, mock_html_path,
+                         image_png, image_jpeg, css, js):
     with requests_mock.Mocker(real_http=True) as mock_request:
         with open(mock_html_path, 'r') as ctx:
             mock_request.get(test_case, text=ctx.read())
-            mock_request.get(test_case, text=ctx.read())
             mock_request.get(
-                f"{test_case}/assets/professions/nodejs.png", content=image)
+                f"{test_case}/assets/professions/nodejs.png", content=image_png)
+            mock_request.get(
+                f"{test_case}/assets/professions/random-image.jpeg",
+                content=image_jpeg)
             mock_request.get(f"{test_case}/assets/application.css", text=css)
             mock_request.get(f"{test_case}/packs/js/runtime.js", text=js)
 

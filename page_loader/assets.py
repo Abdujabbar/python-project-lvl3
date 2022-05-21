@@ -3,7 +3,8 @@ import logging
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from page_loader.resource import get_content
-from page_loader.storage import generate_assets_path, save_content
+from page_loader.slug import sluggify
+from page_loader.storage import generate_assets_path
 from progress.bar import IncrementalBar
 from concurrent import futures
 
@@ -14,26 +15,15 @@ ASSETS_WITH_SRC_MAP = {
     'script': 'src'
 }
 
-IMAGE_EXTENSIONS = [
-    'jpg',
-    'png'
-]
-
 
 def generate_public_path(media_path, store_path):
     return media_path.replace(store_path, '').strip('/')
 
 
-def is_locale_resource(url):
+def is_valid_asset(url, domain):
     obj = urlparse(url)
 
-    return obj.scheme == ''
-
-
-def extract_source_name(url):
-    obj = urlparse(url)
-
-    return obj.path.split('/')[-1]
+    return url.startswith(domain) or obj.scheme == ''
 
 
 def get_domain(url):
@@ -43,7 +33,9 @@ def get_domain(url):
 
 
 def prepare_assets(url, store_path):
+
     html = get_content(url)
+    logging.info(f"url: {url}, fetched content: {html}")
 
     assets_path = generate_assets_path(url, store_path)
 
@@ -57,25 +49,25 @@ def prepare_assets(url, store_path):
         logging.info(f"directory not exists: {assets_path}, creatig . . . ")
         os.mkdir(assets_path)
 
-    domain = get_domain(url)
+    base_domain = get_domain(url)
 
-    logging.info(f"Extracted domain: {domain}")
+    logging.info(f"Extracted domain: {base_domain}")
 
     for tag, attr in ASSETS_WITH_SRC_MAP.items():
-        for node in soup.find_all(tag):
-            if not node.has_attr(attr) or not is_locale_resource(node[attr]):
+        found_tags = soup.find_all(tag)
+        logging.info(f"Tag: {tag}, found items: {len(found_tags)}")
+
+        for node in found_tags:
+            if not node.has_attr(attr)\
+               or not is_valid_asset(node[attr], base_domain):
                 continue
 
-            asset_src = f"{domain}{node[attr]}".strip()
+            asset_src = node[attr]
 
-            file_name = extract_source_name(asset_src)
+            if not asset_src.startswith(base_domain):
+                asset_src = f"{base_domain}{node[attr]}".strip()
 
-            ext = file_name.split('.')[-1]
-
-            if tag == 'img' and ext not in IMAGE_EXTENSIONS:
-                continue
-
-            full_image_path = f"{assets_path}/{file_name}"
+            full_image_path = f"{assets_path}/{sluggify(asset_src)}"
 
             node[attr] = generate_public_path(full_image_path, store_path)
 
@@ -107,7 +99,8 @@ def download_asset(url, path, bar):
     try:
         content = get_content(url)
 
-        save_content(path, content)
+        with open(path, 'wb') as ctx:
+            ctx.write(content)
 
         bar.next()
 
