@@ -1,5 +1,5 @@
 import pytest
-from page_loader.slug import sluggify
+from page_loader.url import to_file
 
 
 @pytest.mark.parametrize(
@@ -23,4 +23,4 @@ from page_loader.slug import sluggify
     ]
 )
 def test_sluggify(test_case, default_ext, expected):
-    assert sluggify(test_case, default_ext) == expected
+    assert to_file(test_case, default_ext) == expected

@@ -3,63 +3,58 @@ import logging
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from page_loader.resource import get_content
-from page_loader.slug import sluggify
-from page_loader.storage import generate_assets_path
+from page_loader.url import to_dir, to_file
 from progress.bar import IncrementalBar
 from concurrent import futures
 
 
-ASSETS_WITH_SRC_MAP = {
+ASSETS_TAGS_MAP = {
     'link': 'href',
     'img': 'src',
     'script': 'src'
 }
 
 
-def generate_public_path(media_path, store_path):
-    return media_path.replace(store_path, '').strip('/')
+def generate_assets_path(dir_path, url, suffix="_files"):
+    return f"{dir_path}/{to_dir(url)}{suffix}"
 
 
-def is_valid_asset(url, domain):
+def is_locale_asset(url, domain):
     obj = urlparse(url)
 
     return url.startswith(domain) or obj.scheme == ''
 
 
-def get_domain(url):
-    obj = urlparse(url)
-
-    return f"{obj.scheme}://{obj.netloc}"
-
-
 def prepare_assets(url, store_path):
-
     html = get_content(url)
     logging.info(f"url: {url}, fetched content: {html}")
 
-    assets_path = generate_assets_path(url, store_path)
+    parsed_url = urlparse(url)
+
+    full_assets_path = generate_assets_path(store_path, url)
 
     assets = []
 
-    logging.info(f"generated assets path: {assets_path}")
+    logging.info(f"generated assets path: {full_assets_path}")
 
     soup = BeautifulSoup(html, 'html.parser')
 
-    if not os.path.exists(assets_path):
-        logging.info(f"directory not exists: {assets_path}, creatig . . . ")
-        os.mkdir(assets_path)
+    if not os.path.exists(full_assets_path):
+        logging.info(
+            f"directory not exists: {full_assets_path}, creatig . . . ")
+        os.mkdir(full_assets_path)
 
-    base_domain = get_domain(url)
+    base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     logging.info(f"Extracted domain: {base_domain}")
 
-    for tag, attr in ASSETS_WITH_SRC_MAP.items():
+    for tag, attr in ASSETS_TAGS_MAP.items():
         found_tags = soup.find_all(tag)
         logging.info(f"Tag: {tag}, found items: {len(found_tags)}")
 
         for node in found_tags:
-            if not node.has_attr(attr)\
-               or not is_valid_asset(node[attr], base_domain):
+            if not node.has_attr(attr) or \
+               not is_locale_asset(node[attr], base_domain):
                 continue
 
             asset_src = node[attr]
@@ -67,11 +62,11 @@ def prepare_assets(url, store_path):
             if not asset_src.startswith(base_domain):
                 asset_src = f"{base_domain}{node[attr]}".strip()
 
-            full_image_path = f"{assets_path}/{sluggify(asset_src)}"
+            file_path = f"{full_assets_path}/{to_file(asset_src)}"
 
-            node[attr] = generate_public_path(full_image_path, store_path)
+            node[attr] = file_path.replace(store_path, '').strip('/')
 
-            assets.append((asset_src, full_image_path))
+            assets.append((asset_src, file_path))
 
     return soup.prettify(), assets
 
