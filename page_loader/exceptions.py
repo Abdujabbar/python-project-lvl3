@@ -1,2 +1,0 @@
-class FailureFetchContentException(Exception):
-    pass

@@ -1,8 +1,8 @@
 import os
+import requests
 import logging
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from page_loader.resource import get_content
 from page_loader.url import to_dir, to_file
 from progress.bar import IncrementalBar
 from concurrent import futures
@@ -26,7 +26,13 @@ def is_locale_asset(url, domain):
 
 
 def prepare_assets(url, store_path):
-    html = get_content(url)
+
+    response = requests.get(url, timeout=1)
+
+    response.raise_for_status()
+
+    html = response.content
+
     logging.info(f"url: {url}, fetched content: {html}")
 
     parsed_url = urlparse(url)
@@ -92,10 +98,11 @@ def download_asset(url, path, bar):
                  f"Path for save: {path}")
 
     try:
-        content = get_content(url)
+        response = requests.get(url, timeout=1)
+        response.raise_for_status()
 
         with open(path, 'wb') as ctx:
-            ctx.write(content)
+            ctx.write(response.content)
 
         bar.next()
 
