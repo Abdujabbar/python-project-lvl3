@@ -1,5 +1,5 @@
-import pytest
-from page_loader.cli import get_cmd_args
+# import pytest
+# from page_loader.cli import get_cmd_args
 
 
 # def test_cmd_parse_empty():
