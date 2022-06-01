@@ -11,7 +11,7 @@ def download(url, dir_path):
     logging.info(f"url: {url}, dir_path: {dir_path}")
 
     html, assets = prepare_assets(url, dir_path)
-    html_path = f"{dir_path}/{to_file(url, '.html')}"
+    html_path = generate_html_path(dir_path, url)
 
     logging.info(f"generated assets: {assets}")
     download_assets(assets)
