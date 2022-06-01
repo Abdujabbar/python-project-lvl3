@@ -1,27 +1,32 @@
-# import pytest
-# from page_loader.cli import get_cmd_args
+import pytest
+import subprocess
 
 
-# def test_cmd_parse_empty():
-#     with pytest.raises(SystemExit):
-#         get_cmd_args()
+def capture(command):
+    proc = subprocess.Popen(command,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+
+    out, err = proc.communicate()
+    return out, err, proc.returncode
 
 
-# @pytest.mark.parametrize(
-#     "url, output",
-#     [
-#         (
-#             "https://ru.hexlet.io/teams",
-#             "/var/tmp"
-#         ),
-#         (
-#             "https://test.com",
-#             "/var/tmp"
-#         ),
-#     ]
-# )
-# def test_cmd_parse_valid(url, output):
-#     args = get_cmd_args([url, f'-o={output}'])
-
-#     assert args.url == url
-#     assert args.output == output
+@pytest.mark.parametrize(
+    "url, output, expected_code",
+    [
+        (
+            "https://ru.hexlet.io/teams",
+            "/var/tmp",
+            0
+        ),
+        (
+            "https://test.com",
+            "/var/tmp",
+            1
+        ),
+    ]
+)
+def test_cmd_parse_valid(url, output, expected_code):
+    command = ["poetry", "run", "page-loader", url, f"-o={output}"]
+    _, _, exitcode = capture(command)
+    assert exitcode == expected_code, "Trouble while execute"
