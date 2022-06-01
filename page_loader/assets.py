@@ -19,12 +19,6 @@ def generate_assets_path(dir_path, url, suffix="_files"):
     return f"{dir_path}/{to_dir(url)}{suffix}"
 
 
-def is_locale_asset(url, domain):
-    obj = urlparse(url)
-
-    return url.startswith(domain) or obj.scheme == ''
-
-
 def prepare_assets(url, store_path):
 
     response = requests.get(url, timeout=1)
@@ -39,8 +33,6 @@ def prepare_assets(url, store_path):
 
     full_assets_path = generate_assets_path(store_path, url)
 
-    assets = []
-
     logging.info(f"generated assets path: {full_assets_path}")
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -49,6 +41,8 @@ def prepare_assets(url, store_path):
         logging.info(
             f"directory not exists: {full_assets_path}, creatig . . . ")
         os.mkdir(full_assets_path)
+
+    assets = []
 
     base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
@@ -59,14 +53,15 @@ def prepare_assets(url, store_path):
         logging.info(f"Tag: {tag}, found items: {len(found_tags)}")
 
         for node in found_tags:
-            if not node.has_attr(attr) or \
-               not is_locale_asset(node[attr], base_domain):
+            asset_src = node[attr]
+            parsed_asset_url = urlparse(asset_src)
+
+            if parsed_asset_url.netloc and\
+               parsed_url.netloc != parsed_asset_url.netloc:
                 continue
 
-            asset_src = node[attr]
-
-            if not asset_src.startswith(base_domain):
-                asset_src = f"{base_domain}{node[attr]}".strip()
+            if not parsed_asset_url.netloc:
+                asset_src = f"{base_domain}{parsed_asset_url.path}".strip()
 
             file_path = f"{full_assets_path}/{to_file(asset_src)}"
 

@@ -3,7 +3,7 @@ import pytest
 import os
 from bs4 import BeautifulSoup
 import requests_mock
-from page_loader.html import download
+from page_loader.page import download
 from page_loader.assets import download_assets, prepare_assets
 from page_loader.assets import ASSETS_TAGS_MAP
 from tests import FIXTURES_PATH
@@ -33,29 +33,29 @@ ASSETS = [
 ]
 
 
-# @pytest.mark.parametrize(
-#     "test_case, mock_html_path",
-#     [
-#         (
-#             "https://test.com",
-#             f"{FIXTURES_PATH}/page-with-assets.html"
-#         ),
-#     ]
-# )
-# def test_download(tmpdir, test_case, mock_html_path):
-#     with requests_mock.Mocker(real_http=True) as mock_request:
-#         with open(mock_html_path, 'r') as ctx:
-#             mock_request.get(test_case, text=ctx.read())
+@pytest.mark.parametrize(
+    "test_case, mock_html_path",
+    [
+        (
+            "https://test.com",
+            f"{FIXTURES_PATH}/page-with-assets.html"
+        ),
+    ]
+)
+def test_download(tmpdir, test_case, mock_html_path):
+    with requests_mock.Mocker(real_http=True) as mock_request:
+        with open(mock_html_path, 'r') as ctx:
+            mock_request.get(test_case, text=ctx.read())
 
-#             for url, path in ASSETS:
-#                 with open(path, "rb") as assets_context:
-#                     mock_request.get(
-#                         f"{test_case}{url}",
-#                         content=assets_context.read()
-#                     )
+            for url, path in ASSETS:
+                with open(path, "rb") as assets_context:
+                    mock_request.get(
+                        f"{test_case}{url}",
+                        content=assets_context.read()
+                    )
 
-#             output_path = download(test_case, str(tmpdir))
-#             assert os.path.exists(output_path)
+            output_path = download(test_case, str(tmpdir))
+            assert os.path.exists(output_path)
 
 
 @pytest.mark.parametrize(

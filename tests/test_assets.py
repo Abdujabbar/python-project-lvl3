@@ -1,6 +1,6 @@
 import pytest
 from page_loader.assets import generate_assets_path
-from page_loader.html import generate_html_path
+from page_loader.page import generate_html_path
 
 
 @pytest.mark.parametrize(

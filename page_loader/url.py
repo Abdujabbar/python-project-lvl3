@@ -1,4 +1,5 @@
 import os
+import re
 from urllib.parse import urlparse
 
 
@@ -8,7 +9,7 @@ def to_dir(url):
 
     url = f"{parsed_url.netloc}{parsed_url.path}"
 
-    result = ['-' if not c.isalnum() else c for c in url]
+    result = re.sub(r"[^a-z0-9+]", '-', url)
 
     return f"{''.join(result)}"
 
@@ -19,8 +20,8 @@ def to_file(url, default_ext='.html'):
 
     ext = os.path.splitext(parsed_url.path)[1]
 
-    url = url.replace('https://', '').replace('http://', '').replace(ext, '')
+    url = f"{parsed_url.netloc}{parsed_url.path}".replace(ext, '')
 
-    result = ['-' if not c.isalnum() else c for c in url]
+    result = re.sub(r"[^a-z0-9+]", '-', url)
 
-    return f"{''.join(result)}{ext or default_ext}"
+    return f"{result}{ext or default_ext}"
