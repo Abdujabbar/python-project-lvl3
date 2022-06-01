@@ -1,3 +1,4 @@
+import logging
 import requests_mock
 import pytest
 import subprocess
@@ -23,7 +24,7 @@ def capture(command):
             f"{FIXTURES_PATH}/page-with-assets.html"
         ),
         (
-            "https://test.com",
+            "https://ru.hexlet.io",
             "/var/tmp",
             0,
             f"{FIXTURES_PATH}/page-with-assets.html"
@@ -35,7 +36,8 @@ def test_cmd_parse_valid(url, output, expected_code, path):
         with open(path, 'r') as ctx:
             mock_request.get(url, text=ctx.read())
             command = ["poetry", "run", "page-loader", url, f"-o={output}"]
-            _, _, exitcode = capture(command)
+            out, err, exitcode = capture(command)
+            print(out, err)
             assert exitcode == expected_code, "Trouble while execute"
 
 
