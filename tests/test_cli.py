@@ -1,4 +1,3 @@
-import logging
 import requests_mock
 import pytest
 import subprocess
