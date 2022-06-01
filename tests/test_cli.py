@@ -25,7 +25,7 @@ def capture(command):
         (
             "https://test.com",
             "/var/tmp",
-            1,
+            0,
             f"{FIXTURES_PATH}/page-with-assets.html"
         ),
     ]
