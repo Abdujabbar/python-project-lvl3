@@ -30,3 +30,9 @@ def test_cmd_exception(url, output, expected_code):
     command = ["poetry", "run", "page-loader", url, f"-o={output}"]
     _, _, exitcode = capture(command)
     assert exitcode == expected_code, "Trouble while execute"
+
+
+def test_cmd_failure():
+    command = ["poetry", "run", "page-loader"]
+    _, _, exitcode = capture(command)
+    assert exitcode != 0, "Trouble cmd args"
