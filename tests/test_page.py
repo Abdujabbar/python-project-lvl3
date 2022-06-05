@@ -3,7 +3,7 @@ import pytest
 import os
 from bs4 import BeautifulSoup
 import requests_mock
-from page_loader.html import download
+from page_loader.page import download
 from page_loader.assets import download_assets, prepare_assets
 from page_loader.assets import ASSETS_TAGS_MAP
 from tests import FIXTURES_PATH
