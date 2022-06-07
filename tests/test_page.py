@@ -4,7 +4,7 @@ import os
 from bs4 import BeautifulSoup
 import requests_mock
 from page_loader.page import download
-from page_loader.assets import download_assets, prepare_assets
+from page_loader.assets import download_assets, get_asset_tags, prepare_assets
 from page_loader.assets import ASSETS_TAGS_MAP
 from tests import FIXTURES_PATH
 
@@ -99,10 +99,10 @@ def test_download_assets(tmpdir, test_case, mock_html_path):
             html, assets = prepare_assets(test_case, str(tmpdir))
             download_assets(assets)
 
-            soup = BeautifulSoup(html, 'html.parser')
+            page = BeautifulSoup(html, 'html.parser')
 
-            for tag, attr in ASSETS_TAGS_MAP.items():
-                for node in soup.find_all(tag):
-                    asset_path = f"{str(tmpdir)}/{node[attr]}"
-                    assert os.path.exists(asset_path), \
-                           f"File not found: {node[attr]}"
+            for tag in get_asset_tags(page):
+                attr = ASSETS_TAGS_MAP[tag.name]
+                asset_path = f"{str(tmpdir)}/{tag[attr]}"
+                assert os.path.exists(asset_path), \
+                       f"File not found: {tag[attr]}"

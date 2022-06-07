@@ -15,6 +15,14 @@ ASSETS_TAGS_MAP = {
 }
 
 
+def get_asset_tags(page: BeautifulSoup):
+    tags = []
+    for tag in ASSETS_TAGS_MAP.keys():
+        tags.extend(page(tag))
+
+    return tags
+
+
 def generate_assets_path(dir_path, url, suffix="_files"):
     return f"{dir_path}/{to_dir(url)}{suffix}"
 
@@ -35,7 +43,7 @@ def prepare_assets(url, store_path):
 
     logging.info(f"generated assets path: {full_assets_path}")
 
-    soup = BeautifulSoup(html, 'html.parser')
+    page = BeautifulSoup(html, 'html.parser')
 
     if not os.path.exists(full_assets_path):
         logging.info(
@@ -48,28 +56,25 @@ def prepare_assets(url, store_path):
 
     logging.info(f"Extracted domain: {base_domain}")
 
-    for tag, attr in ASSETS_TAGS_MAP.items():
-        found_tags = soup.find_all(tag)
-        logging.info(f"Tag: {tag}, found items: {len(found_tags)}")
+    for tag in get_asset_tags(page):
+        attr = ASSETS_TAGS_MAP[tag.name]
+        asset_src = tag[attr]
+        parsed_asset_url = urlparse(asset_src)
 
-        for node in found_tags:
-            asset_src = node[attr]
-            parsed_asset_url = urlparse(asset_src)
+        if parsed_asset_url.netloc and\
+           parsed_url.netloc != parsed_asset_url.netloc:
+            continue
 
-            if parsed_asset_url.netloc and\
-               parsed_url.netloc != parsed_asset_url.netloc:
-                continue
+        if not parsed_asset_url.netloc:
+            asset_src = f"{base_domain}{parsed_asset_url.path}".strip()
 
-            if not parsed_asset_url.netloc:
-                asset_src = f"{base_domain}{parsed_asset_url.path}".strip()
+        file_path = f"{full_assets_path}/{to_file(asset_src)}"
 
-            file_path = f"{full_assets_path}/{to_file(asset_src)}"
+        tag[attr] = file_path.replace(store_path, '').strip('/')
 
-            node[attr] = file_path.replace(store_path, '').strip('/')
+        assets.append((asset_src, file_path))
 
-            assets.append((asset_src, file_path))
-
-    return soup.prettify(), assets
+    return page.prettify(), assets
 
 
 def download_assets(assets):
