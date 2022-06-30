@@ -14,6 +14,7 @@ ASSETS_TAGS_MAP = {
     'script': 'src'
 }
 
+
 def get_asset_tags(page: BeautifulSoup):
     tags = []
     for tag in ASSETS_TAGS_MAP.keys():
